@@ -28,7 +28,7 @@ options(stringAsFactors = FALSE)
 ### Now to import the ground truthed data from D17
 
 ```{r import-data}
-D17_veg <- read.csv("/Volumes/AOP-NEON1-4/D17/Field_Data/2013/Sampling_Data/D17_Vegetation_Structure/D17_2013_vegStr.csv", header = TRUE)
+D17_veg <- read.csv("D17_2013_vegStr.csv", header = TRUE)
 dim(D17_veg)
 str(D17_veg)
 head(D17_veg)
