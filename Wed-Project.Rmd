@@ -6,4 +6,118 @@ output: html_document
 ---
 
 ## Analysis of vegetation diversity for the NEON D17 region
+### Ultimately want to compare diversity estimates (alpha, beta, and gamma) between ground and remote data
+
+```{r first-things}
+set.seed(786121246)
+setwd("~/Desktop/Projects/NEON-2016/Wed-Project/")
+
+library("raster")
+library("rgdal")
+library("vegan")
+library("vegetarian")
+library("dplyr")
+library("reshape")
+options(stringAsFactors = FALSE)
+
+# save and load data for future ease
+# save(file = "SJER_SOAP_veg.RData", list = ls())
+# load(file = "SJER_SOAP_veg.RData")
+```
+
+### Now to import the ground truthed data from D17
+
+```{r import-data}
+D17_veg <- read.csv("/Volumes/AOP-NEON1-4/D17/Field_Data/2013/Sampling_Data/D17_Vegetation_Structure/D17_2013_vegStr.csv")
+dim(D17_veg)
+str(D17_veg)
+head(D17_veg)
+```
+
+### Now to seperate data by site and plot ID, then generate an ecological count matrix
+
+```{r parse-data}
+# test run with only SJER data
+CA_data <- D17_veg %>% group_by(plotid) %>% select(siteid, plotid, taxonid) 
+head(CA_data)
+
+# This will sum the number of each species idnetified in each plot 
+CA_sites <- table(CA_data$plotid, CA_data$taxonid)
+dim(CA_sites)
+
+# Parse into SJER site
+SJER_site <- CA_sites[1:18, ]
+dim(SJER_site)
+head(SJER_site)
+tail(SJER_site)
+
+# Parse into SOAP site
+SOAP_site <- CA_sites[19:36, ]
+dim(SOAP_site)
+head(SOAP_site)
+tail(SOAP_site)
+```
+
+### With our data parsed we can estimate D for the SJER and SOAP sites
+# this is a one off to run the function automatically for and only use three arguements
+```{r calculate-metrics}
+D.one <- function(data, level, q){
+		iter_q <- d(data, lev = level, q = q, boot = TRUE, boot.arg = list(num.iter = 1e3))
+	return(iter_q)
+}
+D.one(data = SJER_site, level = "alpha", q = 0)
+
+
+# Now a more general function to calculate for a range of values
+D.iter.q <- function(data, level, q){
+Spoon <- matrix(data = NA, ncol = 2, nrow = 6)
+  for (i in 1:6){
+  temp <- d(data, lev = level, q = i - 1, boot = TRUE, boot.arg = list(num.iter = 1e3))
+  Spoon[i, 1] <- temp[[1]]
+  Spoon[i, 2] <- temp[[2]]
+  }
+  return(Spoon)
+}
+
+# calculate the a, b, and g metrics for SJER
+SJER.out.a <- D.iter.q(data = SJER_site, level = "alpha", q = 5)
+SJER.out.b <- D.iter.q(data = SJER_site, level = "beta", q = 5)
+SJER.out.g <- D.iter.q(data = SJER_site, level = "gamma", q = 5)
+
+# calculate the a, b, and g metrics for SOAP
+SOAP.out.a <- D.iter.q(data = SOAP_site, level = "alpha", q = 5)
+SOAP.out.b <- D.iter.q(data = SOAP_site, level = "beta", q = 5)
+SOAP.out.g <- D.iter.q(data = SOAP_site, level = "gamma", q = 5)
+```
+
+### Now plot the data and standard errors
+
+```{r plot-metrics}
+# a little function to plot
+plotDeMoney <- function(x){
+	  where <- x[1]
+  	dot <- x[2]
+  	uc <- x[3]
+    lc <- x[4]	
+		segments(where, uc, where, lc, lwd = 3.5)
+		points(where, dot, pch = 15, col = 'grey', cex = 1.5)
+}
+
+# now create the plot for alpha at SJER
+plot(x = seq(from = 0, to = 5, length.out = 4), y = seq(from = 0, to = 3.5, length.out = 4), xaxt = "n", type = "n", ylab = expression(paste(italic(alpha))), las = 1, xlab = expression(paste(italic("q"))))
+axis(1, at = c(0, 1, 2, 3, 4, 5))
+# populate the plot
+for(i in 1:6){
+  plotDeMoney(c(i - 1, uc = SJER.out.a[i, 1] + SJER.out.a[i, 2], SJER.out.a[i, 1], lc = SJER.out.a[i, 1] - SJER.out.a[i, 2]))
+}
+
+# create plot for alpha diversity at SOAP
+plot(x = seq(from = 0, to = 5, length.out = 4), y = seq(from = 0, to = 6, length.out = 4), xaxt = "n", type = "n", ylab = expression(paste(italic(alpha))), las = 1, xlab = expression(paste(italic("q"))))
+axis(1, at = c(0, 1, 2, 3, 4, 5))
+# populate the plot
+for(i in 1:6){
+  plotDeMoney(c(i - 1, uc = SOAP.out.a[i, 1] + SOAP.out.a[i, 2], SOAP.out.a[i, 1], lc = SOAP.out.a[i, 1] - SOAP.out.a[i, 2]))
+}
+```
+
 
