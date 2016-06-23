@@ -160,3 +160,32 @@ for(i in 1:6){
   plotDeMoney(x0 = i - 1, y0 = SOAP.out.g[i , 1] - SOAP.out.g[i, 2], x1 = i - 1, y1 = SOAP.out.g[i , 1] + SOAP.out.g[i, 2], mean = SOAP.out.g[i, 1], dot = i - 1)
 }
 ```
+
+### ordinate the first two PCs using quantitative data (could also use incidence)
+
+```{r ordinate}
+# ordination with PCoA
+
+CA.bray <- vegdist(CA_sites, method = "bray")
+CA.pcoa <- cmdscale(CA.bray, k = (nrow(CA_sites) - 1), eig = TRUE, add = TRUE) # only 24 dims with information if you don't use the Callaiz correction
+CA.pcoa
+
+fig1 <- ordiplot(scores(CA.pcoa)[, c(1,2)], type = "none", main = "", las = 1, xlab = "PCoA 1", ylab = "PCoA 2", display = "sites", ylim = c(-0.7, 0.7))
+points(fig1, "sites", pch = 19, col = c(rep("red", 18), rep("black", 18)), cex = 2)
+legend("topleft", legend = c("SOAP", "SJER"), pch = 19, pt.cex = 2, col = c("red", "black"), bty = "n", cex = 1.5)
+
+# what if we jsut use incidence, not quantified occurance? 
+
+CA_01 <- CA_sites
+CA_01[CA_01 > 0] <- 1
+
+CA.01.bray <- vegdist(CA_01, method = "bray")
+CA.01.pcoa <- cmdscale(CA.01.bray, k = (nrow(CA_01) - 1), eig = TRUE, add = TRUE) 
+CA.01.pcoa
+
+fig2 <- ordiplot(scores(CA.01.pcoa)[, c(1,2)], type = "none", main = "", las = 1, xlab = "PCoA 1", ylab = "PCoA 2", display = "sites", ylim = c(-0.8, 0.8))
+points(fig2, "sites", pch = 19, col = c(rep("red", 18), rep("black", 18)), cex = 2)
+legend("topleft", legend = c("SOAP", "SJER"), pch = 19, pt.cex = 2, col = c("red", "black"), bty = "n", cex = 1.5)
+
+
+```
