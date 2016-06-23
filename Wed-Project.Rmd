@@ -20,6 +20,8 @@ library("dplyr")
 library("reshape")
 options(stringAsFactors = FALSE)
 
+sessID <- sessionInfo()
+
 # save and load data for future ease
 # save(file = "SJER_SOAP_veg.RData", list = ls())
 # load(file = "SJER_SOAP_veg.RData")
