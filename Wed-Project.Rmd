@@ -151,7 +151,7 @@ for(i in 1:6){
 }
 
 # create the plot for gamma diversity at SOAP
-plot(x = seq(from = 0, to = 5, length.out = 4), y = seq(from = 0, to = 18, length.out = 4), xaxt = "n", type = "n", ylab = expression(paste(italic(gamma))), las = 1, xlab = expression(paste(italic("q"))), main = "SJER")
+plot(x = seq(from = 0, to = 5, length.out = 4), y = seq(from = 0, to = 18, length.out = 4), xaxt = "n", type = "n", ylab = expression(paste(italic(gamma))), las = 1, xlab = expression(paste(italic("q"))), main = "SOAP")
 axis(1, at = c(0, 1, 2, 3, 4, 5))
 # populate the plot
 for(i in 1:6){
